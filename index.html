@@ -32,7 +32,7 @@
   </style>
 </head>
 <body>
-  <h1>Gesture Recognition Demo</h1>
+  <h1>Stone Paper Scissors Gesture Detection</h1>
   <video id="video" width="640" height="480" autoplay muted></video>
   <div id="gesture">Detecting...</div>
 
@@ -55,11 +55,23 @@
     hands.onResults((results) => {
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
-        const thumbTip = landmarks[4].y;
-        const indexTip = landmarks[8].y;
 
-        if (thumbTip < indexTip - 0.1) {
-          gestureDisplay.textContent = 'Gesture: Thumbs Up 👍 (Access Granted)';
+        const indexTip = landmarks[8].y;
+        const middleTip = landmarks[12].y;
+        const ringTip = landmarks[16].y;
+        const pinkyTip = landmarks[20].y;
+        const wristY = landmarks[0].y;
+
+        const isFist = indexTip > wristY && middleTip > wristY && ringTip > wristY && pinkyTip > wristY;
+        const isPaper = indexTip < wristY && middleTip < wristY && ringTip < wristY && pinkyTip < wristY;
+        const isScissors = indexTip < wristY && middleTip < wristY && ringTip > wristY && pinkyTip > wristY;
+
+        if (isFist) {
+          gestureDisplay.textContent = 'Detected: ✊ Stone';
+        } else if (isPaper) {
+          gestureDisplay.textContent = 'Detected: 🖐️ Paper';
+        } else if (isScissors) {
+          gestureDisplay.textContent = 'Detected: ✌️ Scissors';
         } else {
           gestureDisplay.textContent = 'Gesture: Unknown';
         }
