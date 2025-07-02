@@ -56,15 +56,17 @@
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
 
-        const indexTip = landmarks[8].y;
-        const middleTip = landmarks[12].y;
-        const ringTip = landmarks[16].y;
-        const pinkyTip = landmarks[20].y;
-        const wristY = landmarks[0].y;
+        // Finger state detection by comparing tip with PIP joint
+        const fingerStates = {
+          index: landmarks[8].y < landmarks[6].y,
+          middle: landmarks[12].y < landmarks[10].y,
+          ring: landmarks[16].y < landmarks[14].y,
+          pinky: landmarks[20].y < landmarks[18].y
+        };
 
-        const isFist = indexTip > wristY && middleTip > wristY && ringTip > wristY && pinkyTip > wristY;
-        const isPaper = indexTip < wristY && middleTip < wristY && ringTip < wristY && pinkyTip < wristY;
-        const isScissors = indexTip < wristY && middleTip < wristY && ringTip > wristY && pinkyTip > wristY;
+        const isFist = !fingerStates.index && !fingerStates.middle && !fingerStates.ring && !fingerStates.pinky;
+        const isPaper = fingerStates.index && fingerStates.middle && fingerStates.ring && fingerStates.pinky;
+        const isScissors = fingerStates.index && fingerStates.middle && !fingerStates.ring && !fingerStates.pinky;
 
         if (isFist) {
           gestureDisplay.textContent = 'Detected: ✊ Stone';
