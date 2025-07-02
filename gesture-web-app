@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gesture Recognition Web App</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    video {
+      border: 2px solid #64b5f6;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    h1 {
+      color: #64b5f6;
+    }
+    #gesture {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #90caf9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gesture Recognition Demo</h1>
+  <video id="video" width="640" height="480" autoplay muted></video>
+  <div id="gesture">Detecting...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script>
+    const videoElement = document.getElementById('video');
+    const gestureDisplay = document.getElementById('gesture');
+
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults((results) => {
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        const thumbTip = landmarks[4].y;
+        const indexTip = landmarks[8].y;
+
+        if (thumbTip < indexTip - 0.1) {
+          gestureDisplay.textContent = 'Gesture: Thumbs Up 👍 (Access Granted)';
+        } else {
+          gestureDisplay.textContent = 'Gesture: Unknown';
+        }
+      } else {
+        gestureDisplay.textContent = 'Detecting...';
+      }
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({image: videoElement});
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+  </script>
+</body>
+</html>
